@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -40,6 +41,30 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
     ];
+    
+    
+    
+    
+    
+    
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+    
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+    
+    public function getSavedPaginateByLimit(int $limit = 1)
+    {
+        return $this::with('posts')->find(Auth::id())->posts()->where('private_or_public', 0)->orderBy('updated_at', 'DESC')->paginate($limit);
+    }
+    
+    public function getPostedPaginateByLimit(int $limit = 1)
+    {
+        return $this::with('posts')->find(Auth::id())->posts()->where('private_or_public', 1)->orderBy('updated_at', 'DESC')->paginate($limit);
+    }
 }
